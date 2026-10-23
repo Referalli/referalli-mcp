@@ -2,7 +2,7 @@
 
 A [Model Context Protocol](https://modelcontextprotocol.io) server for Referalli. It lets Claude, Cursor or any MCP client read your referral and affiliate program (programs, partners, referrals, fraud cases, ROI) and, with your confirmation, act on it (create partners, links and coupons, approve or void referrals, draft payout runs).
 
-It runs locally over stdio with `npx` and talks to `https://referalli.com` with your API key. Requires Node.js 18.18 or later.
+It runs locally over stdio with `npx` and talks to `https://referalli.com` with your API key. Requires Node.js 20 or later.
 
 ## 1. Get an API key
 
