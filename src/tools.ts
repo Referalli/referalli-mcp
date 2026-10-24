@@ -165,6 +165,33 @@ function writeTool(spec: WriteSpec): WriteTool {
   };
 }
 
+type PartnerView = {
+  referralLink?: string | null;
+  pendingMinor: number;
+  approvedMinor: number;
+  paidMinor: number;
+  currency: string;
+  nextPayoutAt?: string | null;
+};
+
+/** A read-only partner self-service tool over GET /v1/support/context, keyed on the partner's externalRef only. */
+function partnerTool(name: string, description: string, pick: (p: PartnerView) => Record<string, unknown>): ReadTool[] {
+  return [
+    {
+      name,
+      description,
+      input: { partnerExternalRef: z.string().min(1).describe("The partner's id in your own system (its externalRef).") },
+      run: async (ctx, a = {}) => {
+        const ref = typeof a.partnerExternalRef === 'string' ? a.partnerExternalRef : '';
+        if (!ref) throw new Error(`${name} needs partnerExternalRef`);
+        const res = (await get(ctx, `/v1/support/context?partnerExternalRef=${encodeURIComponent(ref)}`)) as { partner?: PartnerView | null };
+        if (!res?.partner) return { found: false };
+        return { found: true, ...pick(res.partner) };
+      },
+    },
+  ];
+}
+
 const id = z.string().min(1);
 
 export const TOOLS: Tool[] = [
@@ -253,6 +280,23 @@ export const TOOLS: Tool[] = [
     input: { pattern: z.enum(['credit_only', 'churn_at_exhaustion', 'bonus_collector', 'negative_partner']) },
     run: (ctx, a = {}) => get(ctx, `/v1/roi/patterns/${encodeURIComponent(String(a.pattern))}`),
   },
+
+  // --- partner self-service (read-only, CHT-X08) ---------------------------------
+  ...partnerTool(
+    'my_referral_link',
+    "A partner's own referral link, for answering a partner in chat or an AI agent. Pass the partner's verified id in your system (partnerExternalRef); never guess it from an email.",
+    (p) => ({ referralLink: p.referralLink ?? null }),
+  ),
+  ...partnerTool(
+    'my_balance',
+    "A partner's own commission balance: pending (in its hold period), approved (due in the next payout) and paid, in integer minor units of `currency`.",
+    (p) => ({ pendingMinor: p.pendingMinor, approvedMinor: p.approvedMinor, paidMinor: p.paidMinor, currency: p.currency }),
+  ),
+  ...partnerTool(
+    'my_next_payout',
+    "When a partner's next payout run is (YYYY-MM-DD, or null when none is scheduled) and how much approved commission it would include.",
+    (p) => ({ nextPayoutAt: p.nextPayoutAt ?? null, approvedMinor: p.approvedMinor, currency: p.currency }),
+  ),
 
   // --- writes (preview, then confirm) ------------------------------------------
   writeTool({

@@ -83,6 +83,9 @@ Read tools answer directly:
 | `roi_summary` | Credit ROI: what granted credit cost and the cash it earned back |
 | `roi_trace` | The timeline behind an ROI figure for one customer or one partner |
 | `roi_patterns` | Customers or partners matching a credit-ROI pattern (for example `credit_only`) |
+| `my_referral_link` | A partner's own referral link, by the partner's `partnerExternalRef` (for a support bot answering that partner) |
+| `my_balance` | A partner's own pending, approved and paid commission |
+| `my_next_payout` | A partner's next payout date and the approved amount it would include |
 
 Write tools never act on the first call. They return a preview of exactly what would change plus a one-time confirmation token. Only a second call with `confirm: true`, that token and the same arguments, made within 5 minutes, performs the change:
 

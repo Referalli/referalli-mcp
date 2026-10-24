@@ -1,6 +1,6 @@
 {
   "name": "@referalli/mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Referalli MCP server: read and run your referral and affiliate program from Claude, Cursor and any MCP client.",
   "license": "MIT",
   "type": "module",
